@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarCheck, ChevronDown } from "lucide-react";
 import { formatDateToISODate } from "@/utils/taskUtils";
 import { cn } from "@/lib/utils";
+import { DayContent } from "react-day-picker";
 
 const ProgressCalendar: React.FC = () => {
   const { tasks, getProgressForDate, completedDates } = useAppContext();
@@ -19,64 +20,14 @@ const ProgressCalendar: React.FC = () => {
   // Use the current date as the default selected date
   const [month, setMonth] = useState<Date>(new Date());
   
-  const calendarWithProgress = useMemo(() => {
-    // Create a function that adds custom styling to each date based on completion
-    return (
-      <Calendar
-        mode="single"
-        month={month}
-        onMonthChange={setMonth}
-        className="rounded-md border"
-        classNames={{
-          day_selected: "bg-primary !text-primary-foreground hover:bg-primary/90",
-          day: "focus-visible:bg-primary focus-visible:text-primary-foreground",
-        }}
-        modifiers={{
-          // This allows us to apply custom styling to dates with tasks
-          booked: Object.keys(completedDates).map(date => new Date(date)),
-        }}
-        modifiersClassNames={{
-          booked: "booked-day", // We'll use this as a hook for styling
-        }}
-        components={{
-          Day: ({ date, ...props }) => {
-            const dateString = formatDateToISODate(date);
-            const progress = getProgressForDate(dateString);
-            
-            // Skip if not in the current month
-            if (date.getMonth() !== month.getMonth()) {
-              return <Calendar.Day date={date} {...props} />;
-            }
-            
-            // Define colors based on progress
-            let className = "";
-            
-            if (progress > 0) {
-              if (progress < 0.33) {
-                className = "bg-red-100 text-red-900"; // Low progress
-              } else if (progress < 0.66) {
-                className = "bg-orange-100 text-orange-900"; // Medium progress
-              } else if (progress < 1) {
-                className = "bg-yellow-100 text-yellow-900"; // Good progress
-              } else {
-                className = "bg-green-100 text-green-900"; // Complete
-              }
-            }
-            
-            return (
-              <Calendar.Day 
-                date={date} 
-                {...props}
-                className={cn(props.className, className)} 
-                disabled={false}
-              />
-            );
-          },
-        }}
-      />
-    );
-  }, [month, completedDates, getProgressForDate]);
-
+  const modifiers = useMemo(() => ({
+    booked: Object.keys(completedDates).map(date => new Date(date)),
+  }), [completedDates]);
+  
+  const modifiersStyles = useMemo(() => ({
+    booked: { color: 'white' }
+  }), []);
+  
   return (
     <div className="bg-white rounded-lg p-4 shadow mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -93,7 +44,46 @@ const ProgressCalendar: React.FC = () => {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="end">
-            {calendarWithProgress}
+            <Calendar
+              mode="single"
+              month={month}
+              onMonthChange={setMonth}
+              className="rounded-md border"
+              modifiers={modifiers}
+              modifiersStyles={modifiersStyles}
+              components={{
+                DayContent: (props) => {
+                  const dateString = formatDateToISODate(props.date);
+                  const progress = getProgressForDate(dateString);
+                  
+                  // Skip if not in the current month
+                  if (props.date.getMonth() !== month.getMonth()) {
+                    return <DayContent {...props} />;
+                  }
+                  
+                  // Define colors based on progress
+                  let className = "";
+                  
+                  if (progress > 0) {
+                    if (progress < 0.33) {
+                      className = "bg-red-100 text-red-900"; // Low progress
+                    } else if (progress < 0.66) {
+                      className = "bg-orange-100 text-orange-900"; // Medium progress
+                    } else if (progress < 1) {
+                      className = "bg-yellow-100 text-yellow-900"; // Good progress
+                    } else {
+                      className = "bg-green-100 text-green-900"; // Complete
+                    }
+                  }
+                  
+                  return (
+                    <div className={cn("w-full h-full rounded-md flex items-center justify-center", className)}>
+                      <DayContent {...props} />
+                    </div>
+                  );
+                }
+              }}
+            />
           </PopoverContent>
         </Popover>
       </div>
