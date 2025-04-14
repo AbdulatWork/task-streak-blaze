@@ -6,7 +6,7 @@ import AddTaskForm from "@/components/AddTaskForm";
 import StreakCounter from "@/components/StreakCounter";
 import TaskProgress from "@/components/TaskProgress";
 import { useAppContext } from "@/context/AppContext";
-import { Fire, ListChecks } from "lucide-react";
+import { Flame, ListChecks } from "lucide-react"; // Changed Fire to Flame which is available
 import { Separator } from "@/components/ui/separator";
 
 const TaskList: React.FC = () => {
@@ -47,7 +47,7 @@ const TaskDashboard: React.FC = () => {
           <ListChecks className="h-8 w-8 text-primary mr-2" />
           <h1 className="text-2xl font-bold">Task Streak Blaze</h1>
         </div>
-        <Fire className="h-6 w-6 text-orange-500 animate-pulse-fire" />
+        <Flame className="h-6 w-6 text-orange-500 animate-pulse-fire" /> {/* Changed from Fire to Flame */}
       </div>
       
       <StreakCounter />

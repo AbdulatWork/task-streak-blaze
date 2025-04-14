@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useAppContext } from "@/context/AppContext";
-import { Flame } from "lucide-react";
+import { Flame } from "lucide-react"; // Changed from Fire to Flame
 import { cn } from "@/lib/utils";
 
 const StreakCounter: React.FC = () => {

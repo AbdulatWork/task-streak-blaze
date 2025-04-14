@@ -40,11 +40,11 @@ const AddTaskForm: React.FC = () => {
       return;
     }
     
+    // Remove timeInMinutes from direct addTask call
     addTask({ 
       title, 
       time,
-      isCompleted: false,
-      timeInMinutes: timeToMinutes(time)
+      isCompleted: false
     });
     
     setTitle("");
