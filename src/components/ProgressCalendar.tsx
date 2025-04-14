@@ -20,8 +20,9 @@ const ProgressCalendar: React.FC = () => {
   // Use the current date as the default selected date
   const [month, setMonth] = useState<Date>(new Date());
   
+  // Add a null check for completedDates to avoid the error
   const modifiers = useMemo(() => ({
-    booked: Object.keys(completedDates).map(date => new Date(date)),
+    booked: Object.keys(completedDates || {}).map(date => new Date(date)),
   }), [completedDates]);
   
   const modifiersStyles = useMemo(() => ({
@@ -48,7 +49,7 @@ const ProgressCalendar: React.FC = () => {
               mode="single"
               month={month}
               onMonthChange={setMonth}
-              className="rounded-md border"
+              className="rounded-md border pointer-events-auto"
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
               components={{
