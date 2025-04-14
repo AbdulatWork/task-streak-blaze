@@ -5,6 +5,7 @@ import TaskItem from "@/components/TaskItem";
 import AddTaskForm from "@/components/AddTaskForm";
 import StreakCounter from "@/components/StreakCounter";
 import TaskProgress from "@/components/TaskProgress";
+import ProgressCalendar from "@/components/ProgressCalendar";
 import { useAppContext } from "@/context/AppContext";
 import { Flame, ListChecks } from "lucide-react"; // Changed Fire to Flame which is available
 import { Separator } from "@/components/ui/separator";
@@ -52,6 +53,7 @@ const TaskDashboard: React.FC = () => {
       
       <StreakCounter />
       <TaskProgress />
+      <ProgressCalendar />
       
       <div className="mb-6">
         <AddTaskForm />

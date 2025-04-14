@@ -19,6 +19,7 @@ interface AppContextType extends AppState {
   uncompleteTask: (id: string) => void;
   deleteTask: (id: string) => void;
   resetTasksForToday: () => void;
+  getProgressForDate: (date: string) => number;
 }
 
 const defaultAppState: AppState = {
@@ -26,6 +27,7 @@ const defaultAppState: AppState = {
   streakCount: 0,
   lastCompletedDay: null,
   motivationalQuotes: QUOTES,
+  completedDates: {}, // New state to track progress by date
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -142,9 +144,19 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
     let newStreakCount = state.streakCount;
     let newLastCompletedDay = state.lastCompletedDay;
     
+    // Update the progress for today
+    const today = formatDateToISODate(new Date());
+    const totalTasks = updatedTasks.length;
+    const completedCount = updatedTasks.filter(task => task.isCompleted).length;
+    const progress = totalTasks > 0 ? completedCount / totalTasks : 0;
+    
+    // Update the completed dates object with today's progress
+    const newCompletedDates = {
+      ...state.completedDates,
+      [today]: progress
+    };
+    
     if (allCompleted) {
-      const today = formatDateToISODate(new Date());
-      
       // If this is a new day completion
       if (state.lastCompletedDay !== today) {
         if (shouldIncrementStreak(state.lastCompletedDay)) {
@@ -178,17 +190,33 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
       ...prevState,
       tasks: updatedTasks,
       streakCount: newStreakCount,
-      lastCompletedDay: newLastCompletedDay
+      lastCompletedDay: newLastCompletedDay,
+      completedDates: newCompletedDates
     }));
   };
   
   // Unmark a task as completed
   const uncompleteTask = (id: string) => {
+    const updatedTasks = state.tasks.map(task => 
+      task.id === id ? { ...task, isCompleted: false } : task
+    );
+    
+    // Update the progress for today
+    const today = formatDateToISODate(new Date());
+    const totalTasks = updatedTasks.length;
+    const completedCount = updatedTasks.filter(task => task.isCompleted).length;
+    const progress = totalTasks > 0 ? completedCount / totalTasks : 0;
+    
+    // Update the completed dates object with today's progress
+    const newCompletedDates = {
+      ...state.completedDates,
+      [today]: progress
+    };
+    
     setState(prevState => ({
       ...prevState,
-      tasks: prevState.tasks.map(task => 
-        task.id === id ? { ...task, isCompleted: false } : task
-      )
+      tasks: updatedTasks,
+      completedDates: newCompletedDates
     }));
   };
   
@@ -217,13 +245,19 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
     });
   };
   
+  // Get progress for a specific date
+  const getProgressForDate = (date: string): number => {
+    return state.completedDates[date] || 0;
+  };
+  
   const contextValue: AppContextType = {
     ...state,
     addTask,
     completeTask,
     uncompleteTask,
     deleteTask,
-    resetTasksForToday
+    resetTasksForToday,
+    getProgressForDate
   };
   
   return (
