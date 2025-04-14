@@ -22,7 +22,7 @@ const ProgressCalendar: React.FC = () => {
   
   // Add a null check for completedDates to avoid the error
   const modifiers = useMemo(() => ({
-    booked: Object.keys(completedDates || {}).map(date => new Date(date)),
+    booked: completedDates ? Object.keys(completedDates).map(date => new Date(date)) : [],
   }), [completedDates]);
   
   const modifiersStyles = useMemo(() => ({
@@ -54,34 +54,40 @@ const ProgressCalendar: React.FC = () => {
               modifiersStyles={modifiersStyles}
               components={{
                 DayContent: (props) => {
-                  const dateString = formatDateToISODate(props.date);
-                  const progress = getProgressForDate(dateString);
-                  
-                  // Skip if not in the current month
-                  if (props.date.getMonth() !== month.getMonth()) {
+                  try {
+                    const dateString = formatDateToISODate(props.date);
+                    const progress = getProgressForDate(dateString);
+                    
+                    // Skip if not in the current month
+                    if (props.date.getMonth() !== month.getMonth()) {
+                      return <DayContent {...props} />;
+                    }
+                    
+                    // Define colors based on progress
+                    let className = "";
+                    
+                    if (progress > 0) {
+                      if (progress < 0.33) {
+                        className = "bg-red-100 text-red-900"; // Low progress
+                      } else if (progress < 0.66) {
+                        className = "bg-orange-100 text-orange-900"; // Medium progress
+                      } else if (progress < 1) {
+                        className = "bg-yellow-100 text-yellow-900"; // Good progress
+                      } else {
+                        className = "bg-green-100 text-green-900"; // Complete
+                      }
+                    }
+                    
+                    return (
+                      <div className={cn("w-full h-full rounded-md flex items-center justify-center", className)}>
+                        <DayContent {...props} />
+                      </div>
+                    );
+                  } catch (error) {
+                    // Fallback to default rendering if any errors occur
+                    console.error("Error rendering day:", error);
                     return <DayContent {...props} />;
                   }
-                  
-                  // Define colors based on progress
-                  let className = "";
-                  
-                  if (progress > 0) {
-                    if (progress < 0.33) {
-                      className = "bg-red-100 text-red-900"; // Low progress
-                    } else if (progress < 0.66) {
-                      className = "bg-orange-100 text-orange-900"; // Medium progress
-                    } else if (progress < 1) {
-                      className = "bg-yellow-100 text-yellow-900"; // Good progress
-                    } else {
-                      className = "bg-green-100 text-green-900"; // Complete
-                    }
-                  }
-                  
-                  return (
-                    <div className={cn("w-full h-full rounded-md flex items-center justify-center", className)}>
-                      <DayContent {...props} />
-                    </div>
-                  );
                 }
               }}
             />

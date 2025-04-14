@@ -247,7 +247,11 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
   
   // Get progress for a specific date
   const getProgressForDate = (date: string): number => {
-    return state.completedDates[date] || 0;
+    // Safely return 0 if completedDates is undefined or the date doesn't exist
+    if (!state.completedDates || !state.completedDates[date]) {
+      return 0; 
+    }
+    return state.completedDates[date];
   };
   
   const contextValue: AppContextType = {
